@@ -1,0 +1,89 @@
+<!DOCTYPE html><html lang="tl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>JMB Salitaan</title><style>
+*{box-sizing:border-box;margin:0}html,body{height:100%}
+body{background:radial-gradient(circle at 20% 0%,#1c2f86 0%,#0b1437 60%);color:#fff;font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif}
+button{font:inherit;color:inherit;border:0;cursor:pointer;border-radius:12px}
+.y{color:#ffd23f}.mute{color:#aab4e6}
+.bd{display:grid;grid-template-columns:repeat(17,1fr);gap:1px;background:#0a1030;padding:2px;border-radius:6px}
+.bd i{aspect-ratio:1;background:#1b2a6b;display:grid;place-items:center;font-style:normal;font-weight:800;position:relative;border-radius:2px;line-height:1}
+.bd i.TW{background:#c0392b}.bd i.DW{background:#d9779a}.bd i.TL{background:#2471c8}.bd i.DL{background:#5fa8d8}
+.bd i.t{background:#f3dfae;color:#2b1d05}
+.bd i.pd{background:#ffd23f;color:#2b1d05;outline:2px solid #fff;z-index:1}
+.bd i.sel{outline:3px solid #2fd07a;z-index:2}
+
+#a{min-height:100%;display:flex;flex-direction:column;padding:10px;gap:9px;max-width:560px;margin:0 auto}
+h1{font-size:30px;text-align:center;margin-top:8px}
+.card{background:#14215a;border:2px solid #2a3a85;border-radius:16px;padding:14px;text-align:center}
+input{font:inherit;font-size:20px;width:100%;padding:12px;border-radius:12px;border:2px solid #2a3a85;background:#0e1946;color:#fff;text-align:center;text-transform:uppercase}
+.go{background:#ffd23f;color:#0b1437;font-weight:800;font-size:19px;padding:14px;width:100%}
+.bar{display:flex;justify-content:space-between;font-weight:700;font-size:16px}
+.st{font-weight:800;font-size:17px;text-align:center;padding:8px;border-radius:10px;background:#14215a}
+.st.me{background:#2fd07a;color:#06301a}
+.bd i{font-size:11px}.bd i small{font-size:8px;opacity:.75}
+.rack{display:flex;gap:6px;justify-content:center}
+.rack b{width:13%;max-width:52px;aspect-ratio:1;background:#f3dfae;color:#2b1d05;border-radius:8px;display:grid;place-items:center;font-size:24px;position:relative}
+.rack b sub{position:absolute;right:4px;bottom:2px;font-size:10px}
+.rack b.x{background:#ff9a9a;transform:translateY(-5px)}
+.row{display:flex;gap:8px}.row button{flex:1;padding:12px 6px;font-weight:800;background:#14215a;border:2px solid #2a3a85;font-size:15px}
+.row button.on{background:#2fd07a;color:#06301a;border-color:#2fd07a}
+.err{color:#ffb0b0;text-align:center;min-height:20px;font-weight:700}
+.big{font-size:48px}
+</style></head><body><div id="a"></div><script>
+var API="https://rvyrnkjqxnijxydloujk.supabase.co/functions/v1/salitaan";function call(a,b){b=b||{};b.a=a;return fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}).then(function(r){return r.json()})}
+var PM={"0,0": "TW", "0,8": "TW", "1,1": "DW", "2,2": "DW", "3,3": "DW", "4,4": "DW", "8,8": "DW", "1,6": "TL", "5,5": "TL", "5,8": "TL", "0,4": "DL", "2,7": "DL", "3,6": "DL", "6,6": "DL", "7,7": "DL", "3,8": "DL"},VAL={"A": 1, "N": 1, "I": 1, "O": 1, "T": 1, "S": 1, "L": 1, "U": 1, "G": 2, "K": 2, "M": 2, "E": 2, "P": 3, "Y": 3, "B": 3, "D": 3, "R": 4, "H": 4, "W": 5},ROWS="ABCDEFGHIJKLMNOPQ";
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+var AC=null,MG=null,mt=null,nextT=0,stp=0,wantMusic=true;
+function ac(){if(!AC){var C=window.AudioContext||window.webkitAudioContext;AC=new C()}if(AC.state=="suspended")AC.resume();return AC}
+function tone(f,t,d,type,vol,dest){var a=ac(),o=a.createOscillator(),g=a.createGain();o.type=type||"sine";o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol,t+0.015);g.gain.exponentialRampToValueAtTime(0.0001,t+d);o.connect(g);g.connect(dest||a.destination);o.start(t);o.stop(t+d+0.05);return o}
+var FX={join:[[660,0,.12],[880,.1,.18]],start:[[392,0,.15],[523,.14,.15],[659,.28,.15],[784,.42,.4]],pending:[[523,0,.14],[659,.12,.14],[784,.24,.3]],accept:[[523,0,.12],[659,.1,.12],[784,.2,.12],[1047,.3,.5]],turn:[[440,0,.12],[554,.12,.22]],myturn:[[659,0,.15],[880,.15,.15],[659,.3,.15],[880,.45,.3]],end:[[523,0,.2],[523,.2,.1],[523,.3,.2],[659,.5,.2],[784,.7,.2],[1047,.9,.9]]};
+function sfx(n){try{var a=ac(),t=a.currentTime+0.02;if(n=="reject"){var o=tone(220,t,.5,"sawtooth",.25);o.frequency.linearRampToValueAtTime(110,t+.45);return}(FX[n]||[]).forEach(function(x){tone(x[0],t+x[1],x[2],"triangle",.3)})}catch(e){}}
+var CH=[[261.6,329.6,392],[220,261.6,329.6],[174.6,220,261.6],[196,246.9,293.7]],SC=[523.3,587.3,659.3,784,880,1046.5],
+MEL=[2,-1,3,2,0,-1,1,2, 4,-1,3,2,3,-1,-1,-1, 5,-1,4,3,2,-1,3,4, 3,-1,1,-1,0,-1,-1,-1, 2,2,3,-1,4,-1,3,2, 0,-1,2,4,3,-1,2,-1, 1,-1,2,3,4,-1,5,4, 3,-1,1,2,0,-1,-1,-1];
+function sched(){try{var a=ac();while(nextT<a.currentTime+0.6){var bar=Math.floor(stp/8)%4,e=stp%8,c=CH[bar];
+ if(e==0||e==4||e==3)tone(c[0]/2,nextT,.42,"triangle",.5,MG);
+ tone(c[e%3],nextT,.2,"sine",.16,MG);
+ if(e%2==1)tone(6000,nextT,.03,"square",.015,MG);
+ var m=MEL[stp%MEL.length];if(m>=0)tone(SC[m],nextT,.34,"triangle",.24,MG);
+ nextT+=0.26;stp++}}catch(e){}}
+function startMusic(){try{var a=ac();if(mt)return;if(!MG){MG=a.createGain();MG.gain.value=0.22;MG.connect(a.destination)}nextT=a.currentTime+0.1;mt=setInterval(sched,150);sched()}catch(e){}}
+function stopMusic(){clearInterval(mt);mt=null}
+function prem(r,c){var a=Math.min(r,16-r),b=Math.min(c,16-c);if(a>b){var t=a;a=b;b=t}return PM[a+","+b]||""}
+function boardHTML(S,sel,lab){var pd={},h="";(S.pend||[]).forEach(function(p){pd[p[0]+","+p[1]]=p[2]});
+ for(var r=0;r<17;r++)for(var c=0;c<17;c++){var ch=S.board[r][c],k=r+","+c,p=prem(r,c),cls="",tx="";
+  if(pd[k]){cls="pd";tx=pd[k]}else if(ch!="."){cls="t";tx=ch}else{cls=p;tx=lab?(r==8&&c==8?"★":p):(r==8&&c==8?"★":"")}
+  if(sel&&sel.r==r&&sel.c==c)cls+=" sel";
+  h+='<i class="'+cls+'" data-r="'+r+'" data-c="'+c+'">'+(cls.indexOf("t")==0||cls.indexOf("pd")==0?tx+(lab?'<sub>'+VAL[tx]+'</sub>':''):'<small>'+tx+'</small>')+'</i>'}
+ return h}
+
+var pid=null,key="",S=null,sel=null,dir="H",xs={},msg="";
+document.addEventListener("click",function(){try{ac()}catch(e){}});
+try{pid=localStorage.getItem("jmbsal")}catch(e){}
+function api(p,b){return fetch(p,b?{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}:{cache:"no-store"}).then(function(r){return r.json()})}
+function joinNow(){call("join",{name:document.getElementById("nm").value}).then(function(r){if(r.pid){pid=r.pid;try{localStorage.setItem("jmbsal",pid)}catch(e){}key="";poll()}else{document.getElementById("er").textContent=r.error||"Subukan ulit."}}).catch(function(){document.getElementById("er").textContent="Hindi maabot ang host. Check ang Wi-Fi."})}
+function done(r){msg=r.error||"";if(r.ok){xs={};sel=null;var w=document.getElementById("wd");if(w)w.value=""}key="";poll()}
+function play(){if(!sel){msg="I-tap muna sa board kung saan magsisimula ang salita.";key="";draw();return}call("move",{pid:pid,r:sel.r,c:sel.c,d:dir,word:document.getElementById("wd").value}).then(done)}
+function pass(){call("pass",{pid:pid}).then(done)}
+function swap(){var l=[];for(var i in xs)if(xs[i])l.push(S.me.rack[i]);call("swap",{pid:pid,letters:l}).then(done)}
+function setDir(d){dir=d;key="";draw()}
+function tapRack(i){xs[i]=!xs[i];key="";draw()}
+function draw(){var a=document.getElementById("a"),m=S&&S.me,h="";
+ if(!S)return;
+ if(!m){a.innerHTML='<h1>JMB <span class="y">Salitaan</span></h1><div class="card"><div style="font-weight:700;font-size:20px;margin-bottom:10px">Pangalan ng team ninyo?</div><input id="nm" maxlength="18" placeholder="Hal. Team Adobo" autocomplete="off" style="text-transform:none"><div style="height:10px"></div><button class="go" onclick="joinNow()">Sumali</button><div class="err" id="er"></div></div>';return}
+ var wv=(document.getElementById("wd")||{}).value||"";
+ h='<div class="bar"><span>'+esc(m.name)+'</span><span class="y">'+m.score+' pts</span></div>';
+ if(S.phase=="lobby")h+='<div class="card" style="margin-top:18vh"><div class="big">✅</div><div style="font-weight:800;font-size:20px">Pasok na ang '+esc(m.name)+'!</div><p class="mute" style="margin-top:8px">Hintayin ang host na magsimula.</p></div>';
+ else if(S.phase=="end"){var rk=S.teams.slice().sort(function(x,y){return y.score-x.score});h+='<div class="card" style="margin-top:8vh"><div class="big">🏆</div><div style="font-weight:800;font-size:22px;margin-bottom:8px">Tapos na ang laro!</div>'+rk.map(function(t,i){return '<p style="font-size:18px;margin:4px 0">'+(i+1)+". "+esc(t.name)+' — <b class="y">'+t.score+"</b></p>"}).join("")+"</div>"}
+ else{
+  h+='<div class="st'+(m.myturn?" me":"")+'">'+(m.waiting?"⏳ Hinihintay ang desisyon ng host...":(m.myturn?"KAYO NA! I-tap ang simula, i-type ang salita":"Turn ng "+esc(S.turn)))+'</div>';
+  h+='<div class="bd" id="bd">'+boardHTML(S,m.myturn?sel:null,false)+'</div>';
+  h+='<div class="rack">'+m.rack.map(function(ch,i){return '<b class="'+(xs[i]?"x":"")+'" onclick="tapRack('+i+')">'+ch+"<sub>"+VAL[ch]+"</sub></b>"}).join("")+"</div>";
+  if(m.myturn&&!m.waiting){
+   h+='<div class="row"><button class="'+(dir=="H"?"on":"")+'" onclick="setDir(\'H\')">→ Pahalang</button><button class="'+(dir=="V"?"on":"")+'" onclick="setDir(\'V\')">↓ Pababa</button></div>';
+   h+='<input id="wd" maxlength="17" placeholder="'+(sel?"Buong salita mula "+ROWS[sel.r]+(sel.c+1):"I-tap muna ang board")+'" autocomplete="off" autocapitalize="characters">';
+   h+='<button class="go" onclick="play()">I-play ang salita</button>';
+   h+='<div class="row"><button onclick="swap()">Palitan ang napiling letra</button><button onclick="pass()">Pass</button></div>'}
+  h+='<div class="err">'+esc(msg)+'</div><div class="mute" style="text-align:center;font-size:13px">'+esc(S.last||"")+" · Bag: "+S.bag+"</div>"}
+ a.innerHTML=h;var w=document.getElementById("wd");if(w)w.value=wv;
+ var bd=document.getElementById("bd");if(bd&&m.myturn)bd.onclick=function(e){var t=e.target.closest("i");if(!t)return;sel={r:+t.dataset.r,c:+t.dataset.c};key="";draw()}}
+function poll(){call("state",{pid:pid||""}).then(function(s){var was=S&&S.me&&S.me.myturn;S=s;if(s.me&&s.me.myturn&&!was){sfx("myturn");try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}var k=JSON.stringify(s);if(k!==key){key=k;draw()}}).catch(function(){})}
+setInterval(poll,1500);poll();
+</script></body></html>

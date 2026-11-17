@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="tl"><head><meta charset="utf-8"><title>JMB Salitaan - Host</title><style>
+*{box-sizing:border-box;margin:0}html,body{height:100%}
+body{background:radial-gradient(circle at 20% 0%,#1c2f86 0%,#0b1437 60%);color:#fff;font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif}
+button{font:inherit;color:inherit;border:0;cursor:pointer;border-radius:12px}
+.y{color:#ffd23f}.mute{color:#aab4e6}
+.bd{display:grid;grid-template-columns:repeat(17,1fr);gap:1px;background:#0a1030;padding:2px;border-radius:6px}
+.bd i{aspect-ratio:1;background:#1b2a6b;display:grid;place-items:center;font-style:normal;font-weight:800;position:relative;border-radius:2px;line-height:1}
+.bd i.TW{background:#c0392b}.bd i.DW{background:#d9779a}.bd i.TL{background:#2471c8}.bd i.DL{background:#5fa8d8}
+.bd i.t{background:#f3dfae;color:#2b1d05}
+.bd i.pd{background:#ffd23f;color:#2b1d05;outline:2px solid #fff;z-index:1}
+.bd i.sel{outline:3px solid #2fd07a;z-index:2}
+
+body{overflow:hidden}
+#a{height:100vh;display:grid;grid-template-columns:auto 1fr;gap:2vw;padding:1.5vh 1.5vw}
+.wrap{height:97vh;aspect-ratio:1;display:grid;grid-template-columns:2.6vh 1fr;grid-template-rows:2.6vh 1fr}
+.cl,.rl{display:grid;font-size:1.7vh;font-weight:700;color:#aab4e6;place-items:center}
+.cl{grid-template-columns:repeat(17,1fr)}.rl{grid-template-rows:repeat(17,1fr)}
+.cl span,.rl span{display:grid;place-items:center}
+.bd{gap:.25vh;padding:.4vh}
+.bd i{font-size:3.1vh}.bd i small{font-size:1.25vh;opacity:.8;font-weight:700}
+.bd i sub{position:absolute;right:.3vh;bottom:.15vh;font-size:1.2vh}
+.side{display:flex;flex-direction:column;gap:1.4vh;min-width:0;overflow:hidden}
+h1{font-size:4.2vh;font-weight:900}
+.join{background:#ffd23f;color:#0b1437;padding:1vh 1vw;border-radius:12px;font-weight:900;font-size:2.4vh;text-align:center;word-break:break-all}
+.join small{display:block;font-size:1.7vh;font-weight:700}
+.tm{background:#14215a;border:2px solid #2a3a85;border-radius:12px;padding:1vh 1vw;display:flex;justify-content:space-between;align-items:center;font-size:2.7vh;font-weight:800}
+.tm.cur{border-color:#2fd07a;background:#12402f}
+.tm small{font-size:1.6vh;color:#aab4e6;font-weight:600;display:block}
+.pn{background:#ffd23f;color:#0b1437;border-radius:14px;padding:1.4vh 1vw;font-weight:800;font-size:2.4vh}
+.pn .w{font-size:3.6vh}
+.ctl{display:flex;gap:.6vw;flex-wrap:wrap;margin-top:1vh}
+.ctl button{padding:1.1vh 1vw;font-weight:800;font-size:2vh;background:#14215a;border:2px solid #2a3a85;color:#fff}
+.ctl button.ok{background:#1f9d5c;border-color:#1f9d5c}.ctl button.no{background:#c0392b;border-color:#c0392b}
+.ctl button.go{background:#ffd23f;color:#0b1437;border-color:#ffd23f;font-size:2.6vh}
+.info{font-size:1.9vh;color:#aab4e6}
+.mb{font-size:1.7vh;font-weight:800;padding:.7vh .8vw;background:#14215a;border:2px solid #2a3a85;color:#fff;vertical-align:middle}
+.lg{display:flex;gap:.8vw;flex-wrap:wrap;font-size:1.5vh;font-weight:700}.lg span{padding:.3vh .6vw;border-radius:6px}
+</style></head><body><div id="a"></div><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script>
+var API="https://rvyrnkjqxnijxydloujk.supabase.co/functions/v1/salitaan";function call(a,b){b=b||{};b.a=a;return fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}).then(function(r){return r.json()})}
+var PM={"0,0": "TW", "0,8": "TW", "1,1": "DW", "2,2": "DW", "3,3": "DW", "4,4": "DW", "8,8": "DW", "1,6": "TL", "5,5": "TL", "5,8": "TL", "0,4": "DL", "2,7": "DL", "3,6": "DL", "6,6": "DL", "7,7": "DL", "3,8": "DL"},VAL={"A": 1, "N": 1, "I": 1, "O": 1, "T": 1, "S": 1, "L": 1, "U": 1, "G": 2, "K": 2, "M": 2, "E": 2, "P": 3, "Y": 3, "B": 3, "D": 3, "R": 4, "H": 4, "W": 5},ROWS="ABCDEFGHIJKLMNOPQ";
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+var AC=null,MG=null,mt=null,nextT=0,stp=0,wantMusic=true;
+function ac(){if(!AC){var C=window.AudioContext||window.webkitAudioContext;AC=new C()}if(AC.state=="suspended")AC.resume();return AC}
+function tone(f,t,d,type,vol,dest){var a=ac(),o=a.createOscillator(),g=a.createGain();o.type=type||"sine";o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(vol,t+0.015);g.gain.exponentialRampToValueAtTime(0.0001,t+d);o.connect(g);g.connect(dest||a.destination);o.start(t);o.stop(t+d+0.05);return o}
+var FX={join:[[660,0,.12],[880,.1,.18]],start:[[392,0,.15],[523,.14,.15],[659,.28,.15],[784,.42,.4]],pending:[[523,0,.14],[659,.12,.14],[784,.24,.3]],accept:[[523,0,.12],[659,.1,.12],[784,.2,.12],[1047,.3,.5]],turn:[[440,0,.12],[554,.12,.22]],myturn:[[659,0,.15],[880,.15,.15],[659,.3,.15],[880,.45,.3]],end:[[523,0,.2],[523,.2,.1],[523,.3,.2],[659,.5,.2],[784,.7,.2],[1047,.9,.9]]};
+function sfx(n){try{var a=ac(),t=a.currentTime+0.02;if(n=="reject"){var o=tone(220,t,.5,"sawtooth",.25);o.frequency.linearRampToValueAtTime(110,t+.45);return}(FX[n]||[]).forEach(function(x){tone(x[0],t+x[1],x[2],"triangle",.3)})}catch(e){}}
+var CH=[[261.6,329.6,392],[220,261.6,329.6],[174.6,220,261.6],[196,246.9,293.7]],SC=[523.3,587.3,659.3,784,880,1046.5],
+MEL=[2,-1,3,2,0,-1,1,2, 4,-1,3,2,3,-1,-1,-1, 5,-1,4,3,2,-1,3,4, 3,-1,1,-1,0,-1,-1,-1, 2,2,3,-1,4,-1,3,2, 0,-1,2,4,3,-1,2,-1, 1,-1,2,3,4,-1,5,4, 3,-1,1,2,0,-1,-1,-1];
+function sched(){try{var a=ac();while(nextT<a.currentTime+0.6){var bar=Math.floor(stp/8)%4,e=stp%8,c=CH[bar];
+ if(e==0||e==4||e==3)tone(c[0]/2,nextT,.42,"triangle",.5,MG);
+ tone(c[e%3],nextT,.2,"sine",.16,MG);
+ if(e%2==1)tone(6000,nextT,.03,"square",.015,MG);
+ var m=MEL[stp%MEL.length];if(m>=0)tone(SC[m],nextT,.34,"triangle",.24,MG);
+ nextT+=0.26;stp++}}catch(e){}}
+function startMusic(){try{var a=ac();if(mt)return;if(!MG){MG=a.createGain();MG.gain.value=0.22;MG.connect(a.destination)}nextT=a.currentTime+0.1;mt=setInterval(sched,150);sched()}catch(e){}}
+function stopMusic(){clearInterval(mt);mt=null}
+function prem(r,c){var a=Math.min(r,16-r),b=Math.min(c,16-c);if(a>b){var t=a;a=b;b=t}return PM[a+","+b]||""}
+function boardHTML(S,sel,lab){var pd={},h="";(S.pend||[]).forEach(function(p){pd[p[0]+","+p[1]]=p[2]});
+ for(var r=0;r<17;r++)for(var c=0;c<17;c++){var ch=S.board[r][c],k=r+","+c,p=prem(r,c),cls="",tx="";
+  if(pd[k]){cls="pd";tx=pd[k]}else if(ch!="."){cls="t";tx=ch}else{cls=p;tx=lab?(r==8&&c==8?"★":p):(r==8&&c==8?"★":"")}
+  if(sel&&sel.r==r&&sel.c==c)cls+=" sel";
+  h+='<i class="'+cls+'" data-r="'+r+'" data-c="'+c+'">'+(cls.indexOf("t")==0||cls.indexOf("pd")==0?tx+(lab?'<sub>'+VAL[tx]+'</sub>':''):'<small>'+tx+'</small>')+'</i>'}
+ return h}
+
+var S=null,key="",cr=0,KEY=location.hash.slice(1),JOIN=location.host+location.pathname.replace(/host\.html$/,""),QR="";
+try{var qd=document.createElement("div");new QRCode(qd,{text:"https://"+JOIN,width:320,height:320});setTimeout(function(){try{var c=qd.querySelector("canvas");QR=c.toDataURL();key="";if(S)draw()}catch(e){}},300)}catch(e){}
+function mlabel(){return mt?"🎵 Music: ON":"🔇 Music: OFF (i-click)"}
+function toggleMusic(){if(mt){stopMusic();wantMusic=false}else{wantMusic=true;startMusic()}var b=document.getElementById("mb");if(b)b.textContent=mlabel()}
+document.addEventListener("click",function(){try{ac()}catch(e){}if(wantMusic&&!mt){startMusic();var b=document.getElementById("mb");if(b)b.textContent=mlabel()}});
+function fx(p,s){if(!p)return;if(s.teams.length>p.teams.length)sfx("join");if(p.phase=="lobby"&&s.phase=="play")sfx("start");else if(p.phase!="end"&&s.phase=="end")sfx("end");else if(!p.pending&&s.pending)sfx("pending");else if(p.pending&&!s.pending)sfx(s.board.join("")!=p.board.join("")?"accept":"reject");else if(s.turn!=p.turn&&s.phase=="play")sfx("turn")}
+function act(a){call("host",{key:KEY,action:a}).then(poll)}
+function two(b,a,t){if(cr!==a){cr=a;b.textContent=t;return}cr=0;act(a)}
+function mmss(s){return Math.floor(s/60)+":"+("0"+s%60).slice(-2)}
+function draw(){var cl="",rl="",i;for(i=0;i<17;i++){cl+="<span>"+(i+1)+"</span>";rl+="<span>"+ROWS[i]+"</span>"}
+ var h='<div class="wrap"><div></div><div class="cl">'+cl+'</div><div class="rl">'+rl+'</div><div class="bd">'+boardHTML(S,null,true)+'</div></div><div class="side">';
+ h+='<h1>JMB <span class="y">Salitaan</span> <button id="mb" class="mb" onclick="toggleMusic()">'+mlabel()+'</button></h1><div class="join"><small>Sumali: i-scan ang QR o i-type sa phone browser</small>'+esc(S.url)+(QR?'<br><img src="'+QR+'" style="width:16vh;height:16vh;margin-top:.8vh;border:.6vh solid #fff;border-radius:8px">':'')+'</div>';
+ var ts=S.phase=="end"?S.teams.slice().sort(function(x,y){return y.score-x.score}):S.teams;
+ h+=ts.map(function(t,i){return '<div class="tm'+(t.cur?" cur":"")+'"><span>'+(S.phase=="end"&&i==0?"🏆 ":"")+esc(t.name)+(t.cur?' <small>TURN NILA · <span id="el"></span></small>':"")+'</span><span class="y">'+t.score+"</span></div>"}).join("");
+ if(S.phase=="lobby")h+='<div class="info">'+S.teams.length+' / 4 teams ang nakapasok. Isang phone bawat grupo.</div><div class="ctl"><button class="go" onclick="act(\'start\')">Simulan ang Laro ▶</button></div>';
+ if(S.pending){var p=S.pending;h+='<div class="pn">'+esc(p.team)+" · "+p.at+" "+(p.dir=="H"?"→":"↓")+'<div class="w">'+p.words.map(function(w){return esc(w[0])+" ("+w[1]+")"}).join(" + ")+(p.bonus?" + 50 bonus":"")+" = "+p.total+' pts</div>Totoong Tagalog word ba?<div class="ctl"><button class="ok" onclick="act(\'accept\')">✔ Accept (Enter)</button><button class="no" onclick="act(\'reject\')">✖ Reject</button></div></div>'}
+ if(S.phase=="play")h+='<div class="info">Bag: '+S.bag+" tiles"+(S.last?" · Huli: "+esc(S.last):"")+'</div><div class="lg"><span style="background:#c0392b">TW ×3 salita</span><span style="background:#d9779a">DW ×2 salita</span><span style="background:#2471c8">TL ×3 letra</span><span style="background:#5fa8d8">DL ×2 letra</span></div><div class="ctl">'+(S.pending?"":'<button onclick="act(\'skip\')">Skip turn</button>')+'<button onclick="two(this,\'end\',\'I-click ulit: End\')">End game</button><button onclick="two(this,\'reset\',\'I-click ulit: Reset\')">Reset</button></div>';
+ if(S.phase=="end")h+='<h1 class="y">Final Results</h1><div class="info">Ibinawas na ang halaga ng natirang tiles.</div><div class="ctl"><button onclick="two(this,\'reset\',\'I-click ulit: Reset\')">Bagong laro</button></div>';
+ h+="</div>";document.getElementById("a").innerHTML=h}
+function poll(){call("hoststate",{key:KEY}).then(function(s){if(s.error){document.getElementById("a").innerHTML='<h1 style="padding:5vh">Hindi tama ang host link. Gamitin ang buong link na ibinigay.</h1>';return}s.url=JOIN;var e=s.elapsed;delete s.elapsed;fx(S,s);S=s;var k=JSON.stringify(s);if(k!==key){key=k;cr=0;draw()}var x=document.getElementById("el");if(x)x.textContent=mmss(e)}).catch(function(){})}
+setInterval(poll,1000);poll();
+document.addEventListener("keydown",function(e){if(e.key=="Enter"&&S&&S.pending)act("accept")});
+</script></body></html>
